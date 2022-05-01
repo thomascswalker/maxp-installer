@@ -1,0 +1,1 @@
+"C:\Users\Tom\AppData\Roaming\Python\Python37\Scripts\pyside2-uic.exe" -g python -o ui.py installer.ui
