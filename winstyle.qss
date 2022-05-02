@@ -1,21 +1,36 @@
-style = """QMainWindow {
-    background-color: #FAFAFA;
+/*
+
+Black:          #FFFFFF
+Off-Black:      #212121
+Very Dark-gray: #383838
+Dark Gray:      #444444
+Mid-Gray:       #535353
+Light Gray:     #646464
+Off-white:      #999999
+White:          #FFFFFF
+
+*/
+
+QMainWindow {
+    background-color: #444444;
     font-family: Segoe UI Semilight;
 }
 
 QLabel {
     font-family: Segoe UI Semilight;
     font-size: 14px;
+    color: #FFFFFF;
 }
 
 QComboBox {
     height: 32px;
+    color: FFFFFF;
 }
 
 QAbstractButton {
-    background-color: #BDBDBD;
+    background-color: #535353;
     height: 32px;
-    color: #000000;
+    color: #FFFFFF;
     border-style: none;
     border-width: 0px;
     border-radius: 0px;
@@ -26,20 +41,21 @@ QAbstractButton {
 }
 
 QAbstractButton:hover {
-    border-style: outset;
+    border-style: solid;
     border-width: .1em;
-    border-color: #000000;
+    border-color: #888888;
+    background-color: #646464;
 }
 
 QAbstractButton:pressed {
     border-style: none;
-    background-color: #757575;
+    background-color: #383838;
     border-radius: 2px;
 }
 
 QAbstractButton:disabled {
     color: #BDBDBD;
-    background-color: #757575;
+    background-color: #535353;
 }
 
 QPushButton {
@@ -96,4 +112,16 @@ QComboBox QAbstractItemView:item {
     border: 2px solid darkgray;
     selection-background-color: lightgray;
 }
-"""
+
+QAbstractItemView {
+    background-color: #383838;
+    color: #FFFFFF;
+    font-family: Segoe UI Semilight;
+    font-size: 14px;
+}
+
+QAbstractItemView::item:active {
+    background-color: #383838;
+    color: #FFFFFF;
+    padding: 10px;
+}

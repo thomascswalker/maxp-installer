@@ -6,11 +6,15 @@ from typing import List, Tuple
 from collections import namedtuple
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtCore import QFile
-from PySide2.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PySide2.QtCore import QFile, QTextStream
+from PySide2.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QMessageBox,
+    QTableWidget,
+    QTableWidgetItem,
+)
 
-from ui import Ui_MainWindow
-from winstyle import style
 
 PACKAGE = "better-max-tools-thomascswalker"
 GITHUB = r"https://github.com/thomascswalker/better-max-tools"
@@ -23,7 +27,7 @@ MaxInstall = namedtuple(
 )
 
 
-def get_max_installs() -> List[Tuple[str]]:
+def getMaxInstallations() -> List[Tuple[str]]:
     dirs = glob(AUTODESK_PATH + r"\3ds Max*")
     result = []
 
@@ -53,7 +57,7 @@ def get_max_installs() -> List[Tuple[str]]:
     return result
 
 
-def is_package_installed(install: MaxInstall) -> bool:
+def isPackageInstalled(install: MaxInstall) -> bool:
     args = [install.pythonExecutable, "-m", "pip", "list"]
     result = subprocess.check_output(args)
     for line in result.decode().split("\n"):
@@ -63,7 +67,18 @@ def is_package_installed(install: MaxInstall) -> bool:
     return False
 
 
-def install_package(install: MaxInstall) -> bool:
+def getInstalledPackages(install: MaxInstall) -> list:
+    packages = []
+    args = [install.pythonExecutable, "-m", "pip", "list"]
+    result = subprocess.check_output(args)
+
+    for line in result.decode().split("\n"):
+        packages.append(line)
+
+    return packages
+
+
+def installPackage(install: MaxInstall) -> bool:
     interpreter = install.pythonExecutable
     if not os.path.exists(interpreter):
         raise FileNotFoundError("Python interpreter not found.")
@@ -78,7 +93,7 @@ def install_package(install: MaxInstall) -> bool:
     return True
 
 
-def uninstall_package(install: MaxInstall) -> bool:
+def uninstallPackage(install: MaxInstall) -> bool:
     interpreter = install.pythonExecutable
     if not os.path.exists(interpreter):
         raise FileNotFoundError("Python interpreter not found.")
@@ -94,56 +109,70 @@ def uninstall_package(install: MaxInstall) -> bool:
 
 
 class InstallerWindow(QMainWindow):
-    _installations: List[MaxInstall] = get_max_installs()
+    _installations: List[MaxInstall] = getMaxInstallations()
     _currentInstall: MaxInstall = _installations[0]
 
     def __init__(self) -> None:
         super().__init__()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
 
-        for installation in self._installations:
-            item = (f"3ds Max {installation.version}", installation.directory)
-            self.ui.maxVersionList.addItem(*item)
+        try:
+            from ui import Ui_MainWindow
 
-        self.setInstallPath()
+            self.ui = Ui_MainWindow()
+            self.ui.setupUi(self)
+        except ImportError:
+            uiFileName = os.path.join(os.path.dirname(__file__), "installer.ui")
+            file = QFile(uiFileName)
+            file.open(QFile.ReadOnly)
 
+            loader = QUiLoader()
+            self.ui = loader.load(file, None)
+            self.setCentralWidget(self.ui.centralWidget())
+            file.close()
+
+        self.refreshUi()
         self.setupConnections()
-        self.updateInstallButtonState()
         self.setupStyle()
+
+    def refreshUi(self):
+        for installation in self._installations:
+            name = f"3ds Max {installation.version}"
+            data = installation.directory
+            self.ui.maxVersionList.addItem(name, data)
+
+        # Get the list of currently-installed packages
+        for package in getInstalledPackages(self._currentInstall)[1:]:
+            elements = package.split()
+            if len(elements) < 2:
+                continue
+            name = elements[0]
+            version = elements[1]
+            if name == None or version == None:
+                continue
+            index = self.ui.packages.rowCount()
+            self.ui.packages.insertRow(index)
+            nameItem = QTableWidgetItem(name)
+            versionItem = QTableWidgetItem(version)
+            self.ui.packages.setItem(index - 1, 0, nameItem)
+            self.ui.packages.setItem(index - 1, 1, versionItem)
+
+        self.ui.installPath.setText(SITE_PACKAGES)
 
     def setupConnections(self):
         self.ui.maxVersionExplore.clicked.connect(self.exploreMaxVersion)
-        self.ui.install.clicked.connect(self.install)
-        self.ui.uninstall.clicked.connect(self.uninstall)
-
-    def updateInstallButtonState(self):
-        isInstalled = is_package_installed(self._currentInstall)
-        if not isInstalled:
-            self.ui.install.setEnabled(True)
-            self.ui.uninstall.setEnabled(False)
-        else:
-            self.ui.install.setEnabled(False)
-            self.ui.uninstall.setEnabled(True)
 
     def setupStyle(self):
-        self.setStyleSheet(style)
-
-    def setInstallPath(self):
-        self.ui.installPath.setText(SITE_PACKAGES)
+        file = QFile(os.path.join(os.path.dirname(__file__), "winstyle.qss"))
+        file.open(QFile.ReadOnly)
+        stream = QTextStream(file)
+        content = stream.readAll()
+        file.close()
+        self.setStyleSheet(content)
 
     def exploreMaxVersion(self):
         path = self.ui.maxVersionList.currentData()
         if os.path.exists(path):
             subprocess.Popen(f'explorer "{path}"')
-
-    def install(self):
-        install_package(self._currentInstall)
-        self.updateInstallButtonState()
-
-    def uninstall(self):
-        uninstall_package(self._currentInstall)
-        self.updateInstallButtonState()
 
 
 def main():
