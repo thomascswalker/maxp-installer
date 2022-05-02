@@ -25,6 +25,7 @@ class Ui_MainWindow(object):
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setMinimumSize(QSize(550, 320))
         MainWindow.setMaximumSize(QSize(550, 550))
+        MainWindow.setUnifiedTitleAndToolBarOnMac(True)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout = QGridLayout(self.centralwidget)
@@ -56,55 +57,38 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addLayout(self.verticalLayout)
 
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_3.addItem(self.horizontalSpacer_2)
-
 
         self.gridLayout.addLayout(self.horizontalLayout_3, 0, 0, 1, 1)
 
-        self.packages = QTableWidget(self.centralwidget)
-        if (self.packages.columnCount() < 2):
-            self.packages.setColumnCount(2)
-        __qtablewidgetitem = QTableWidgetItem()
-        self.packages.setHorizontalHeaderItem(0, __qtablewidgetitem)
-        __qtablewidgetitem1 = QTableWidgetItem()
-        self.packages.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        self.packages.setObjectName(u"packages")
-        self.packages.setColumnCount(2)
-        self.packages.horizontalHeader().setDefaultSectionSize(100)
-        self.packages.horizontalHeader().setStretchLastSection(True)
-        self.packages.verticalHeader().setVisible(False)
-        self.packages.verticalHeader().setMinimumSectionSize(20)
-        self.packages.verticalHeader().setHighlightSections(False)
-
-        self.gridLayout.addWidget(self.packages, 3, 0, 1, 1)
-
+        self.groupBox = QGroupBox(self.centralwidget)
+        self.groupBox.setObjectName(u"groupBox")
+        self.verticalLayout_2 = QVBoxLayout(self.groupBox)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(-1, 20, -1, -1)
-        self.maxVersionList = QComboBox(self.centralwidget)
+        self.horizontalLayout.setContentsMargins(-1, 0, -1, -1)
+        self.maxVersionList = QComboBox(self.groupBox)
         self.maxVersionList.setObjectName(u"maxVersionList")
 
         self.horizontalLayout.addWidget(self.maxVersionList)
 
-        self.maxVersionExplore = QToolButton(self.centralwidget)
+        self.maxVersionExplore = QToolButton(self.groupBox)
         self.maxVersionExplore.setObjectName(u"maxVersionExplore")
 
         self.horizontalLayout.addWidget(self.maxVersionExplore)
 
 
-        self.gridLayout.addLayout(self.horizontalLayout, 1, 0, 1, 1)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.label_2 = QLabel(self.centralwidget)
+        self.label_2 = QLabel(self.groupBox)
         self.label_2.setObjectName(u"label_2")
         self.label_2.setTextFormat(Qt.AutoText)
 
         self.horizontalLayout_4.addWidget(self.label_2)
 
-        self.installPath = QLabel(self.centralwidget)
+        self.installPath = QLabel(self.groupBox)
         self.installPath.setObjectName(u"installPath")
         self.installPath.setTextFormat(Qt.RichText)
         self.installPath.setWordWrap(False)
@@ -115,10 +99,48 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_4.addItem(self.horizontalSpacer_3)
 
+        self.pythonPackagesExplore = QToolButton(self.groupBox)
+        self.pythonPackagesExplore.setObjectName(u"pythonPackagesExplore")
 
-        self.gridLayout.addLayout(self.horizontalLayout_4, 2, 0, 1, 1)
+        self.horizontalLayout_4.addWidget(self.pythonPackagesExplore)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_4)
+
+
+        self.gridLayout.addWidget(self.groupBox, 1, 0, 1, 1)
+
+        self.groupBox_2 = QGroupBox(self.centralwidget)
+        self.groupBox_2.setObjectName(u"groupBox_2")
+        self.verticalLayout_3 = QVBoxLayout(self.groupBox_2)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.packages = QTableWidget(self.groupBox_2)
+        if (self.packages.columnCount() < 2):
+            self.packages.setColumnCount(2)
+        __qtablewidgetitem = QTableWidgetItem()
+        self.packages.setHorizontalHeaderItem(0, __qtablewidgetitem)
+        __qtablewidgetitem1 = QTableWidgetItem()
+        self.packages.setHorizontalHeaderItem(1, __qtablewidgetitem1)
+        self.packages.setObjectName(u"packages")
+        self.packages.setAlternatingRowColors(False)
+        self.packages.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.packages.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.packages.setColumnCount(2)
+        self.packages.horizontalHeader().setDefaultSectionSize(100)
+        self.packages.horizontalHeader().setStretchLastSection(True)
+        self.packages.verticalHeader().setVisible(False)
+        self.packages.verticalHeader().setMinimumSectionSize(20)
+        self.packages.verticalHeader().setHighlightSections(False)
+
+        self.verticalLayout_3.addWidget(self.packages)
+
+
+        self.gridLayout.addWidget(self.groupBox_2, 2, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
+        self.statusBar = QStatusBar(MainWindow)
+        self.statusBar.setObjectName(u"statusBar")
+        MainWindow.setStatusBar(self.statusBar)
 
         self.retranslateUi(MainWindow)
 
@@ -127,14 +149,17 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:16pt;\">Better Max Tools</span></p></body></html>", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"This will install the better-max-tools package into an environment accessible by 3ds Max.", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:16pt;\">3ds Max Python Package Explorer</span></p></body></html>", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>This will show all installed packages for the selected 3ds Max version as well as aid in installing third party packages.</p></body></html>", None))
+        self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"3ds Max Versions", None))
+        self.maxVersionExplore.setText(QCoreApplication.translate("MainWindow", u"Open", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Install location:", None))
+        self.installPath.setText("")
+        self.pythonPackagesExplore.setText(QCoreApplication.translate("MainWindow", u"Open", None))
+        self.groupBox_2.setTitle(QCoreApplication.translate("MainWindow", u"Packages installed", None))
         ___qtablewidgetitem = self.packages.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Name", None));
         ___qtablewidgetitem1 = self.packages.horizontalHeaderItem(1)
         ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Version", None));
-        self.maxVersionExplore.setText(QCoreApplication.translate("MainWindow", u"Open", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Install location:", None))
-        self.installPath.setText("")
     # retranslateUi
 

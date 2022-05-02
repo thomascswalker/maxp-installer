@@ -147,7 +147,7 @@ class InstallerWindow(QMainWindow):
                 continue
             name = elements[0]
             version = elements[1]
-            if name == None or version == None:
+            if name is None or version is None:
                 continue
             index = self.ui.packages.rowCount()
             self.ui.packages.insertRow(index)
@@ -162,7 +162,7 @@ class InstallerWindow(QMainWindow):
         self.ui.maxVersionExplore.clicked.connect(self.exploreMaxVersion)
 
     def setupStyle(self):
-        file = QFile(os.path.join(os.path.dirname(__file__), "winstyle.qss"))
+        file = QFile(os.path.join(os.path.dirname(__file__), "adsk_dark.qss"))
         file.open(QFile.ReadOnly)
         stream = QTextStream(file)
         content = stream.readAll()
