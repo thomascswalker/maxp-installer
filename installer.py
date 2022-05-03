@@ -11,7 +11,6 @@ from PySide2.QtWidgets import (
     QApplication,
     QMainWindow,
     QMessageBox,
-    QTableWidget,
     QTableWidgetItem,
 )
 
@@ -115,6 +114,7 @@ class InstallerWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
 
+        # Import the UI, either from a .ui file or a compiled .py file
         try:
             from ui import Ui_MainWindow
 
@@ -130,9 +130,15 @@ class InstallerWindow(QMainWindow):
             self.setCentralWidget(self.ui.centralWidget())
             file.close()
 
-        self.refreshUi()
+        # Set default properties
+        self.setWindowTitle("maxp Installer")
+
+        # Run setup methods
         self.setupConnections()
         self.setupStyle()
+
+        # Refresh the Ui
+        self.refreshUi()
 
     def refreshUi(self):
         for installation in self._installations:
@@ -141,25 +147,43 @@ class InstallerWindow(QMainWindow):
             self.ui.maxVersionList.addItem(name, data)
 
         # Get the list of currently-installed packages
-        for package in getInstalledPackages(self._currentInstall)[1:]:
+        # The first entry will be "-------" so we'll skip that
+        packages = getInstalledPackages(self._currentInstall)[1:]
+        for package in packages:
+
+            # Split the package into its elements: name, version
             elements = package.split()
+
+            # If the split didn't work, continue
             if len(elements) < 2:
                 continue
+
+            # Extract the name and version
             name = elements[0]
             version = elements[1]
+
+            # If either is invalid, continue
             if name is None or version is None:
                 continue
+
+            # Add a new row to the table
             index = self.ui.packages.rowCount()
             self.ui.packages.insertRow(index)
+            index -= 1
+
+            # Create a table item for the name and version
             nameItem = QTableWidgetItem(name)
             versionItem = QTableWidgetItem(version)
-            self.ui.packages.setItem(index - 1, 0, nameItem)
-            self.ui.packages.setItem(index - 1, 1, versionItem)
+
+            # Set the current row's columns to the name and version
+            self.ui.packages.setItem(index, 0, nameItem)
+            self.ui.packages.setItem(index, 1, versionItem)
 
         self.ui.installPath.setText(SITE_PACKAGES)
 
     def setupConnections(self):
-        self.ui.maxVersionExplore.clicked.connect(self.exploreMaxVersion)
+        self.ui.btnExploreMax.clicked.connect(self.exploreMaxVersion)
+        self.ui.btnExplorePython.clicked.connect(self.explorePythonPackages)
 
     def setupStyle(self):
         file = QFile(os.path.join(os.path.dirname(__file__), "adsk_dark.qss"))
@@ -171,6 +195,11 @@ class InstallerWindow(QMainWindow):
 
     def exploreMaxVersion(self):
         path = self.ui.maxVersionList.currentData()
+        if os.path.exists(path):
+            subprocess.Popen(f'explorer "{path}"')
+
+    def explorePythonPackages(self):
+        path = self._currentInstall.sitePackages
         if os.path.exists(path):
             subprocess.Popen(f'explorer "{path}"')
 
