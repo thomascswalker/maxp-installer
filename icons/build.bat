@@ -1,0 +1,1 @@
+pyside2-rcc maxp.qrc -o ../resources.py
