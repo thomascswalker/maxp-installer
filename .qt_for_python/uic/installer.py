@@ -52,17 +52,22 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
 
         self.packages = QTableWidget(self.groupBox_2)
-        if (self.packages.columnCount() < 2):
-            self.packages.setColumnCount(2)
+        if (self.packages.columnCount() < 4):
+            self.packages.setColumnCount(4)
         __qtablewidgetitem = QTableWidgetItem()
         self.packages.setHorizontalHeaderItem(0, __qtablewidgetitem)
         __qtablewidgetitem1 = QTableWidgetItem()
         self.packages.setHorizontalHeaderItem(1, __qtablewidgetitem1)
+        __qtablewidgetitem2 = QTableWidgetItem()
+        self.packages.setHorizontalHeaderItem(2, __qtablewidgetitem2)
+        __qtablewidgetitem3 = QTableWidgetItem()
+        self.packages.setHorizontalHeaderItem(3, __qtablewidgetitem3)
         self.packages.setObjectName(u"packages")
         self.packages.setAlternatingRowColors(False)
         self.packages.setSelectionMode(QAbstractItemView.SingleSelection)
         self.packages.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.packages.setColumnCount(2)
+        self.packages.setColumnCount(4)
+        self.packages.horizontalHeader().setVisible(False)
         self.packages.horizontalHeader().setDefaultSectionSize(100)
         self.packages.horizontalHeader().setStretchLastSection(True)
         self.packages.verticalHeader().setVisible(False)
@@ -73,6 +78,35 @@ class Ui_MainWindow(object):
 
 
         self.gridLayout.addWidget(self.groupBox_2, 2, 0, 1, 1)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.verticalLayout = QVBoxLayout()
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(0, -1, -1, -1)
+        self.label = QLabel(self.centralwidget)
+        self.label.setObjectName(u"label")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy1)
+        self.label.setTextFormat(Qt.RichText)
+        self.label.setWordWrap(True)
+
+        self.verticalLayout.addWidget(self.label)
+
+        self.label_3 = QLabel(self.centralwidget)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setWordWrap(True)
+
+        self.verticalLayout.addWidget(self.label_3)
+
+
+        self.horizontalLayout_3.addLayout(self.verticalLayout)
+
+
+        self.gridLayout.addLayout(self.horizontalLayout_3, 0, 0, 1, 1)
 
         self.groupBox = QGroupBox(self.centralwidget)
         self.groupBox.setObjectName(u"groupBox")
@@ -124,34 +158,10 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.groupBox, 1, 0, 1, 1)
 
-        self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.verticalLayout = QVBoxLayout()
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(0, -1, -1, -1)
-        self.label = QLabel(self.centralwidget)
-        self.label.setObjectName(u"label")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy1)
-        self.label.setTextFormat(Qt.RichText)
-        self.label.setWordWrap(True)
+        self.spinBox = QSpinBox(self.centralwidget)
+        self.spinBox.setObjectName(u"spinBox")
 
-        self.verticalLayout.addWidget(self.label)
-
-        self.label_3 = QLabel(self.centralwidget)
-        self.label_3.setObjectName(u"label_3")
-        self.label_3.setWordWrap(True)
-
-        self.verticalLayout.addWidget(self.label_3)
-
-
-        self.horizontalLayout_3.addLayout(self.verticalLayout)
-
-
-        self.gridLayout.addLayout(self.horizontalLayout_3, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.spinBox, 3, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusBar = QStatusBar(MainWindow)
@@ -171,12 +181,16 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Name", None));
         ___qtablewidgetitem1 = self.packages.horizontalHeaderItem(1)
         ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Version", None));
+        ___qtablewidgetitem2 = self.packages.horizontalHeaderItem(2)
+        ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"Update", None));
+        ___qtablewidgetitem3 = self.packages.horizontalHeaderItem(3)
+        ___qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", u"Uninstall", None));
+        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:16pt;\">3ds Max Python Package Explorer</span></p></body></html>", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>This will show all installed packages for the selected 3ds Max version as well as aid in installing third party packages.</p></body></html>", None))
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"3ds Max Versions", None))
         self.btnExploreMax.setText(QCoreApplication.translate("MainWindow", u"Explore", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Install location:", None))
         self.installPath.setText("")
         self.btnExplorePython.setText(QCoreApplication.translate("MainWindow", u"Explore", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:16pt;\">3ds Max Python Package Explorer</span></p></body></html>", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>This will show all installed packages for the selected 3ds Max version as well as aid in installing third party packages.</p></body></html>", None))
     # retranslateUi
 

@@ -57,6 +57,12 @@ QSpinBox, QDoubleSpinBox {
 QSpinBox::up-button, QSpinBox::down-button, QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
     border: 0px solid #000000;
 }
+QSpinBox::down-arrow {
+    image: url(:/common/down_arrow.png);
+}
+QSpinBox::up-arrow {
+    image: url(:/common/up_arrow.png);
+}
 /*
     GROUPBOX
 */
@@ -89,10 +95,12 @@ QComboBox:hover {
     border: 1px solid #505050;
 }
 QComboBox::down-arrow {
-    border: none;
+    image: url(:/common/down_arrow.png);
 }
 QComboBox::drop-down {
     border: none;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
 }
 QComboBox QAbstractItemView {
     border: 2px solid #444444;

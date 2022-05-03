@@ -11,12 +11,13 @@ from PySide2.QtWidgets import (
     QApplication,
     QMainWindow,
     QMessageBox,
+    QPushButton,
     QTableWidgetItem,
 )
 
+import resources  # noqa: F401
 
-PACKAGE = "better-max-tools-thomascswalker"
-GITHUB = r"https://github.com/thomascswalker/better-max-tools"
+
 APPLICATION_PLUGINS_PATH = r"C:\ProgramData\Autodesk\ApplicationPlugins"
 AUTODESK_PATH = r"C:\Program Files\Autodesk"
 SITE_PACKAGES = os.path.join(os.getenv("appdata"), r"Python\Python37\site-packages")
@@ -77,30 +78,30 @@ def getInstalledPackages(install: MaxInstall) -> list:
     return packages
 
 
-def installPackage(install: MaxInstall) -> bool:
+def installPackage(install: MaxInstall, package: str) -> bool:
     interpreter = install.pythonExecutable
     if not os.path.exists(interpreter):
         raise FileNotFoundError("Python interpreter not found.")
 
     subprocess.Popen(f"{interpreter} -m ensurepip")
 
-    args = [interpreter, "-m", "pip", "install", PACKAGE]
-    output = subprocess.check_output(args)
+    args = [interpreter, "-m", "pip", "install", package]
+    subprocess.check_output(args)
 
     QMessageBox.information(None, "Better Max Tools", "Installed!")
 
     return True
 
 
-def uninstallPackage(install: MaxInstall) -> bool:
+def uninstallPackage(install: MaxInstall, package: str) -> bool:
     interpreter = install.pythonExecutable
     if not os.path.exists(interpreter):
         raise FileNotFoundError("Python interpreter not found.")
 
     subprocess.Popen(f"{interpreter} -m ensurepip")
 
-    args = [interpreter, "-m", "pip", "uninstall", "-y", PACKAGE]
-    output = subprocess.check_output(args)
+    args = [interpreter, "-m", "pip", "uninstall", "-y", package]
+    subprocess.check_output(args)
 
     QMessageBox.information(None, "Better Max Tools", "Uninstalled!")
 
@@ -110,14 +111,14 @@ def uninstallPackage(install: MaxInstall) -> bool:
 class InstallerWindow(QMainWindow):
     _installations: List[MaxInstall] = getMaxInstallations()
     _currentInstall: MaxInstall = _installations[0]
+    _packageColumns: dict = {'name': 0, 'version': 1, 'update': 2, 'uninstall': 3}
 
     def __init__(self) -> None:
         super().__init__()
 
         # Import the UI, either from a .ui file or a compiled .py file
         try:
-            from ui import Ui_MainWindow
-
+            from ui import Ui_MainWindow  # type: ignore
             self.ui = Ui_MainWindow()
             self.ui.setupUi(self)
         except ImportError:
@@ -176,8 +177,19 @@ class InstallerWindow(QMainWindow):
             versionItem = QTableWidgetItem(version)
 
             # Set the current row's columns to the name and version
-            self.ui.packages.setItem(index, 0, nameItem)
-            self.ui.packages.setItem(index, 1, versionItem)
+            nameCol = self._packageColumns['name']
+            versionCol = self._packageColumns['version']
+            updateCol = self._packageColumns['update']
+            uninstallCol = self._packageColumns['uninstall']
+
+            self.ui.packages.setItem(index, nameCol, nameItem)
+            self.ui.packages.setItem(index, versionCol, versionItem)
+
+            updateBtn = QPushButton('Update')
+            self.ui.packages.setCellWidget(index, updateCol, updateBtn)
+
+            uninstallBtn = QPushButton('Uninstall')
+            self.ui.packages.setCellWidget(index, uninstallCol, uninstallBtn)
 
         self.ui.installPath.setText(SITE_PACKAGES)
 
