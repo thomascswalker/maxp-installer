@@ -1,5 +1,6 @@
 from glob import glob
 import os
+from shutil import ExecError
 import sys
 import subprocess
 from typing import List, Tuple
@@ -26,30 +27,23 @@ MaxInstall = namedtuple(
     "MaxInstall", ["directory", "version", "pythonExecutable", "sitePackages"]
 )
 
-
 def getMaxInstallations() -> List[Tuple[str]]:
     dirs = glob(AUTODESK_PATH + r"\3ds Max*")
     result = []
 
     for dir in dirs:
         if os.path.exists(os.path.join(dir, "3dsmax.exe")):
-            version = dir.split(" ")[-1]
+            version = int(dir.split(" ")[-1])
+            appdata = os.getenv("appdata")
 
             if version == 2022:
-                pythonExecutable = os.path.join(dir, "Python37\\python.exe")
-                sitePackages = os.path.join(
-                    os.getenv("appdata"), "Python\\Python37\\site-packages"
-                )
+                pythonExecutable = os.path.join(dir, r"Python37\python.exe")
+                sitePackages = os.path.join(appdata, r"Python\Python37\site-packages")
             elif version == 2023:
-                pythonExecutable = os.path.join(dir, "Python39\\python.exe")
-                sitePackages = os.path.join(
-                    os.getenv("appdata"), "Python\\Python39\\site-packages"
-                )
+                pythonExecutable = os.path.join(dir, r"Python\python.exe")
+                sitePackages = os.path.join(appdata, r"Python\Python39\site-packages")
             else:
-                pythonExecutable = os.path.join(dir, "Python37\\python.exe")
-                sitePackages = os.path.join(
-                    os.getenv("appdata"), "Python\\Python37\\site-packages"
-                )
+                return []
 
             install = MaxInstall(dir, version, pythonExecutable, sitePackages)
             result.append(install)
@@ -68,8 +62,21 @@ def isPackageInstalled(install: MaxInstall) -> bool:
 
 
 def getInstalledPackages(install: MaxInstall) -> list:
+    interpreter = install.pythonExecutable
+    if not os.path.exists(interpreter):
+        raise FileNotFoundError("Python interpreter not found.")
+
+    p = subprocess.Popen(f"\"{interpreter}\" -m ensurepip", stdout=subprocess.PIPE, shell=True)
+    (output, error) = p.communicate()
+
+    p.wait()
+
+    if error is not None:
+        raise ExecError(output)
+
     packages = []
-    args = [install.pythonExecutable, "-m", "pip", "list"]
+    args = [interpreter, "-m", "pip", "list"]
+
     result = subprocess.check_output(args)
 
     for line in result.decode().split("\n"):
@@ -83,8 +90,6 @@ def installPackage(install: MaxInstall, package: str) -> bool:
     if not os.path.exists(interpreter):
         raise FileNotFoundError("Python interpreter not found.")
 
-    subprocess.Popen(f"{interpreter} -m ensurepip")
-
     args = [interpreter, "-m", "pip", "install", package]
     subprocess.check_output(args)
 
@@ -97,8 +102,6 @@ def uninstallPackage(install: MaxInstall, package: str) -> bool:
     interpreter = install.pythonExecutable
     if not os.path.exists(interpreter):
         raise FileNotFoundError("Python interpreter not found.")
-
-    subprocess.Popen(f"{interpreter} -m ensurepip")
 
     args = [interpreter, "-m", "pip", "uninstall", "-y", package]
     subprocess.check_output(args)
@@ -141,11 +144,16 @@ class InstallerWindow(QMainWindow):
         # Refresh the Ui
         self.refreshUi()
 
-    def refreshUi(self):
+    def refreshUi(self) -> None:
+        # Update the installation combo box with installed 3ds Max versions
         for installation in self._installations:
             name = f"3ds Max {installation.version}"
             data = installation.directory
             self.ui.maxVersionList.addItem(name, data)
+
+        # Clear the current package list
+        self.ui.packages.setRowCount(0)
+        self.ui.packages.clear()
 
         # Get the list of currently-installed packages
         # The first entry will be "-------" so we'll skip that
@@ -191,13 +199,14 @@ class InstallerWindow(QMainWindow):
             uninstallBtn = QPushButton('Uninstall')
             self.ui.packages.setCellWidget(index, uninstallCol, uninstallBtn)
 
-        self.ui.installPath.setText(SITE_PACKAGES)
+        self.ui.installPath.setText(self._currentInstall.sitePackages)
 
-    def setupConnections(self):
+    def setupConnections(self) -> None:
         self.ui.btnExploreMax.clicked.connect(self.exploreMaxVersion)
         self.ui.btnExplorePython.clicked.connect(self.explorePythonPackages)
+        self.ui.toolButton.clicked.connect(self.installClicked)
 
-    def setupStyle(self):
+    def setupStyle(self) -> None:
         file = QFile(os.path.join(os.path.dirname(__file__), "adsk_dark.qss"))
         file.open(QFile.ReadOnly)
         stream = QTextStream(file)
@@ -205,18 +214,23 @@ class InstallerWindow(QMainWindow):
         file.close()
         self.setStyleSheet(content)
 
-    def exploreMaxVersion(self):
+    def exploreMaxVersion(self) -> None:
         path = self.ui.maxVersionList.currentData()
         if os.path.exists(path):
             subprocess.Popen(f'explorer "{path}"')
 
-    def explorePythonPackages(self):
+    def explorePythonPackages(self) -> None:
         path = self._currentInstall.sitePackages
         if os.path.exists(path):
             subprocess.Popen(f'explorer "{path}"')
 
+    def installClicked(self):
+        package = self.ui.lineEdit.text()
+        installPackage(self._currentInstall, package)
+        self.refreshUi()
 
-def main():
+
+def main() -> None:
     app = QApplication(sys.argv)
 
     dialog = InstallerWindow()
