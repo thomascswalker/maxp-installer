@@ -27,6 +27,7 @@ MaxInstall = namedtuple(
     "MaxInstall", ["directory", "version", "pythonExecutable", "sitePackages"]
 )
 
+
 def getMaxInstallations() -> List[Tuple[str]]:
     dirs = glob(AUTODESK_PATH + r"\3ds Max*")
     result = []
@@ -66,7 +67,9 @@ def getInstalledPackages(install: MaxInstall) -> list:
     if not os.path.exists(interpreter):
         raise FileNotFoundError("Python interpreter not found.")
 
-    p = subprocess.Popen(f"\"{interpreter}\" -m ensurepip", stdout=subprocess.PIPE, shell=True)
+    p = subprocess.Popen(
+        f'"{interpreter}" -m ensurepip', stdout=subprocess.PIPE, shell=True
+    )
     (output, error) = p.communicate()
 
     p.wait()
@@ -114,7 +117,7 @@ def uninstallPackage(install: MaxInstall, package: str) -> bool:
 class InstallerWindow(QMainWindow):
     _installations: List[MaxInstall] = getMaxInstallations()
     _currentInstall: MaxInstall = _installations[0]
-    _packageColumns: dict = {'name': 0, 'version': 1, 'update': 2, 'uninstall': 3}
+    _packageColumns: dict = {"name": 0, "version": 1, "update": 2, "uninstall": 3}
 
     def __init__(self) -> None:
         super().__init__()
@@ -122,6 +125,7 @@ class InstallerWindow(QMainWindow):
         # Import the UI, either from a .ui file or a compiled .py file
         try:
             from ui import Ui_MainWindow  # type: ignore
+
             self.ui = Ui_MainWindow()
             self.ui.setupUi(self)
         except ImportError:
@@ -142,15 +146,14 @@ class InstallerWindow(QMainWindow):
         self.setupStyle()
 
         # Refresh the Ui
-        self.refreshUi()
-
-    def refreshUi(self) -> None:
-        # Update the installation combo box with installed 3ds Max versions
         for installation in self._installations:
             name = f"3ds Max {installation.version}"
             data = installation.directory
             self.ui.maxVersionList.addItem(name, data)
 
+        self.refreshUi()
+
+    def refreshUi(self) -> None:
         # Clear the current package list
         self.ui.packages.setRowCount(0)
         self.ui.packages.clear()
@@ -185,18 +188,18 @@ class InstallerWindow(QMainWindow):
             versionItem = QTableWidgetItem(version)
 
             # Set the current row's columns to the name and version
-            nameCol = self._packageColumns['name']
-            versionCol = self._packageColumns['version']
-            updateCol = self._packageColumns['update']
-            uninstallCol = self._packageColumns['uninstall']
+            nameCol = self._packageColumns["name"]
+            versionCol = self._packageColumns["version"]
+            updateCol = self._packageColumns["update"]
+            uninstallCol = self._packageColumns["uninstall"]
 
             self.ui.packages.setItem(index, nameCol, nameItem)
             self.ui.packages.setItem(index, versionCol, versionItem)
 
-            updateBtn = QPushButton('Update')
+            updateBtn = QPushButton("Update")
             self.ui.packages.setCellWidget(index, updateCol, updateBtn)
 
-            uninstallBtn = QPushButton('Uninstall')
+            uninstallBtn = QPushButton("Uninstall")
             self.ui.packages.setCellWidget(index, uninstallCol, uninstallBtn)
 
         self.ui.installPath.setText(self._currentInstall.sitePackages)
@@ -205,6 +208,7 @@ class InstallerWindow(QMainWindow):
         self.ui.btnExploreMax.clicked.connect(self.exploreMaxVersion)
         self.ui.btnExplorePython.clicked.connect(self.explorePythonPackages)
         self.ui.toolButton.clicked.connect(self.installClicked)
+        self.ui.maxVersionList.currentTextChanged.connect(self.versionChanged)
 
     def setupStyle(self) -> None:
         file = QFile(os.path.join(os.path.dirname(__file__), "adsk_dark.qss"))
@@ -223,6 +227,17 @@ class InstallerWindow(QMainWindow):
         path = self._currentInstall.sitePackages
         if os.path.exists(path):
             subprocess.Popen(f'explorer "{path}"')
+
+    def versionChanged(self):
+        text = self.ui.maxVersionList.currentText()
+        version = int(text.split(" ")[-1])
+
+        for install in self._installations:
+            if install.version == version:
+                self._currentInstall = install
+                break
+
+        self.refreshUi()
 
     def installClicked(self):
         package = self.ui.lineEdit.text()
